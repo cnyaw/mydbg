@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="mydbg" />
+		<Option pch_mode="2" />
+		<Option compiler="msvc8" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/mydbg" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="msvc8" />
+				<Compiler>
+					<Add option="/MTd" />
+					<Add option="/Zi" />
+					<Add option="/D_DEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="/DEBUG" />
+					<Add library="dbghelp" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/mydbg" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="msvc8" />
+				<Compiler>
+					<Add option="/MT" />
+					<Add option="/Ox" />
+					<Add option="/DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add library="dbghelp" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="/W3" />
+			<Add option="/EHsc" />
+		</Compiler>
+		<Unit filename="bp.cpp" />
+		<Unit filename="dbg.cpp" />
+		<Unit filename="dbgevloop.cpp" />
+		<Unit filename="dispsrc.cpp" />
+		<Unit filename="main.cpp" />
+		<Unit filename="mydbg.h" />
+		<Unit filename="mydbghelp.h" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>
