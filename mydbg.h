@@ -48,7 +48,7 @@ void DumpLocals();
 const BREAK_POINT* FindBreakPoint(DWORD64 addr);
 DWORD64 GetCurrIp();
 bool GetSourceLineByAddr(DWORD64 Addr, std::string &fn, int &LineNumber, DWORD &displacement);
-std::string GetVariableTypeName(ULONG typeIndex, PSYMBOL_INFO pSymInfo);
+std::string GetVariableTypeName(ULONG typeId, PSYMBOL_INFO pSymInfo);
 void Go();
 bool HandleSoftBreak(const BREAK_POINT* bp);
 bool HandleSoftBreakSingleStep(const BREAK_POINT* bp);

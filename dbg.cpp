@@ -83,12 +83,12 @@ ULONG64 GetVariableAddress(PSYMBOL_INFO pSymInfo)
   }
 }
 
-std::string GetBaseTypeName(ULONG typeIndex, PSYMBOL_INFO pSymInfo)
+std::string GetBaseTypeName(ULONG typeId, PSYMBOL_INFO pSymInfo)
 {
   DWORD type;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_BASETYPE, &type);
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_BASETYPE, &type);
   ULONG64 length;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_LENGTH, &length);
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_LENGTH, &length);
   switch (type) {
     case btVoid:
       return "void";
@@ -129,12 +129,12 @@ std::string GetBaseTypeName(ULONG typeIndex, PSYMBOL_INFO pSymInfo)
   return "BaseType";
 }
 
-std::string GetBaseTypeValue(ULONG typeIndex, PSYMBOL_INFO pSymInfo, const char *pData)
+std::string GetBaseTypeValue(ULONG typeId, PSYMBOL_INFO pSymInfo, const char *pData)
 {
   DWORD type;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_BASETYPE, &type);
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_BASETYPE, &type);
   ULONG64 length;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_LENGTH, &length);
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_LENGTH, &length);
   char buff[32];
   switch (type) {
     case btChar:
@@ -191,30 +191,30 @@ std::string GetBaseTypeValue(ULONG typeIndex, PSYMBOL_INFO pSymInfo, const char 
   return "";
 }
 
-std::string GetArrayTypeName(ULONG typeIndex, PSYMBOL_INFO pSymInfo)
+std::string GetArrayTypeName(ULONG typeId, PSYMBOL_INFO pSymInfo)
 {
-  DWORD containTypeIndex;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_TYPEID, &containTypeIndex);
+  DWORD containTypeId;
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_TYPEID, &containTypeId);
   DWORD count;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_COUNT, &count);
-  std::string typeName = GetVariableTypeName(containTypeIndex, pSymInfo);
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_COUNT, &count);
+  std::string typeName = GetVariableTypeName(containTypeId, pSymInfo);
   char buff[64];
   sprintf(buff, "%u", (unsigned int)count);
   return typeName + "[" + buff + "]";
 }
 
-std::string GetPointTypeName(ULONG typeIndex, PSYMBOL_INFO pSymInfo)
+std::string GetPointTypeName(ULONG typeId, PSYMBOL_INFO pSymInfo)
 {
-  DWORD containTypeIndex;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_TYPEID, &containTypeIndex);
-  std::string typeName = GetVariableTypeName(containTypeIndex, pSymInfo);
+  DWORD containTypeId;
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_TYPEID, &containTypeId);
+  std::string typeName = GetVariableTypeName(containTypeId, pSymInfo);
   return typeName + "*";
 }
 
-std::string GetUdtTypeName(ULONG typeIndex, PSYMBOL_INFO pSymInfo)
+std::string GetUdtTypeName(ULONG typeId, PSYMBOL_INFO pSymInfo)
 {
   WCHAR *pName;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_SYMNAME, &pName);
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_SYMNAME, &pName);
   int NeedLen = WideCharToMultiByte(CP_ACP, 0, pName, -1, NULL, 0, NULL, NULL);
   std::string buff;
   buff.resize(NeedLen);
@@ -223,37 +223,37 @@ std::string GetUdtTypeName(ULONG typeIndex, PSYMBOL_INFO pSymInfo)
   return buff;
 }
 
-std::string GetVariableTypeName(ULONG typeIndex, PSYMBOL_INFO pSymInfo)
+std::string GetVariableTypeName(ULONG typeId, PSYMBOL_INFO pSymInfo)
 {
   // https://debuginfo.com/articles/dbghelptypeinfo.html
   DWORD symTag;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_SYMTAG, &symTag);
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_SYMTAG, &symTag);
   switch (symTag) {
     case SymTagUDT:
     case SymTagEnum:
-      return GetUdtTypeName(typeIndex, pSymInfo);
+      return GetUdtTypeName(typeId, pSymInfo);
     case SymTagFunctionType:
       return "<func>";
     case SymTagPointerType:
-      return GetPointTypeName(typeIndex, pSymInfo);
+      return GetPointTypeName(typeId, pSymInfo);
     case SymTagArrayType:
-      return GetArrayTypeName(typeIndex, pSymInfo);
+      return GetArrayTypeName(typeId, pSymInfo);
     case SymTagBaseType:
-      return GetBaseTypeName(typeIndex, pSymInfo);
+      return GetBaseTypeName(typeId, pSymInfo);
   }
   char buff[32];
   sprintf(buff, "<unknown>%d", (int)symTag);
   return buff;
 }
 
-std::string GetVariableValue(ULONG typeIndex, PSYMBOL_INFO pSymInfo, const std::string &data)
+std::string GetVariableValue(ULONG typeId, PSYMBOL_INFO pSymInfo, const std::string &data)
 {
   DWORD symTag;
-  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeIndex, TI_GET_SYMTAG, &symTag);
+  SymGetTypeInfo(g_piDbgee.hProcess, pSymInfo->ModBase, typeId, TI_GET_SYMTAG, &symTag);
   char buff[32];
   switch (symTag) {
     case SymTagBaseType:
-      return GetBaseTypeValue(typeIndex, pSymInfo, data.data());
+      return GetBaseTypeValue(typeId, pSymInfo, data.data());
     case SymTagPointerType:
       sprintf(buff, "0x%x", *(unsigned int*)data.data());
       return buff;
